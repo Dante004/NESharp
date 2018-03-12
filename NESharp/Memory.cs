@@ -77,7 +77,54 @@ namespace NESharp
 
         public override byte ReadByte(ushort address)
         {
-            throw new NotImplementedException();
+            if (address >= 0x0000 && address <= 0x00FF)
+            {
+                return zeroPage[address];
+            }
+            else if (address >= 0x0100 && address <= 0x01FF)
+            {
+                return stack[address - 0x0100];
+            }
+            else if (address >= 0x0200 && address <= 0x07FF)
+            {
+                return ram[address - 0x0200];
+            }
+            else if(address >= 0x0800 && address <= 0x08FF)
+            {
+                return zeroPage[address - 0x0800];
+            }
+            else if (address >= 0x0900 && address <= 0x09FF)
+            {
+                return stack[address - 0x08900];
+            }
+            else if (address >= 0x0A00 && address <= 0x0FFF)
+            {
+                return ram[address - 0x0A00];
+            }
+            else if(address >=0x1000 && address <=0x10FF)
+            {
+                return zeroPage[address - 0x1000];
+            }
+            else if (address >= 0x1100 && address <= 0x11FF)
+            {
+                return stack[address - 0x1100];
+            }
+            else if (address >= 0x1200 && address <= 0x17FF)
+            {
+                return ram[address - 0x10FF];
+            }
+            else if (address >= 0x1800 && address <= 0x18FF)
+            {
+                return zeroPage[address - 0x1800];
+            }
+            else if (address >= 0x1900 && address <= 0x19FF)
+            {
+                return stack[address - 0x1900];
+            }
+            else if (address >= 0x1A00 && address <= 0x1FFF)
+            {
+                return ram[address - 0x1A00];
+            }
         }
 
         public override void WriteByte(ushort address, byte valume)

@@ -13,8 +13,6 @@ using System.Threading.Tasks;
 //CPU speed										1.79 MHz	1.66 MHz
 namespace NESharp
 {
-    
-
     class CPU
     {
         /// Processor Flag
@@ -31,7 +29,9 @@ namespace NESharp
         byte AC, XR, YR;
         ushort PC, S;
         int cycle;
-        public static CPUMemory memory = new CPUMemory();
+        public CPUMemory memory;
+
+
         public void PowerUp()
         {
             PC = 0x34;
@@ -46,15 +46,11 @@ namespace NESharp
                 memory.WriteByte(i);
             }
         }
-        CPU()
+        public CPU(CPUMemory memory)
         {
-
+            this.memory = memory;
         }
 
-        CPU()
-        {
-
-        }
     }
     
    
