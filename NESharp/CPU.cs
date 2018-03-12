@@ -39,12 +39,20 @@ namespace NESharp
             XR = 0x0;
             YR = 0x0;
 
-            memory.WriteByte(0x4017);
-            memory.WriteByte(0x4015);
-            for (int i = 0x4000; i++, i<= 0x400F)
+            memory.WriteByte(0x4017, 0x00);
+            memory.WriteByte(0x4015, 0x00);
+            for (ushort i = 0x4000; i<=0x400F; i++)
             {
-                memory.WriteByte(i);
+                memory.WriteByte(i, 0x00);
             }
+            //TODO: All 15 bits of noise channel LFSR = $0000[3]. The first time the LFSR is clocked from the all-0s state, it will shift in a 1.
+        }
+        public void Reset()
+        {
+            S -= 3;
+            flagInterrupt = true;
+            memory.WriteByte(0x4015, 0);
+
         }
         public CPU(CPUMemory memory)
         {
