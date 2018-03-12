@@ -30,6 +30,10 @@ namespace NESharp
         ushort PC, S;
         int cycle;
         public CPUMemory memory;
+        public CPU(CPUMemory memory)
+        {
+            this.memory = memory;
+        }
 
 
         public void PowerUp()
@@ -54,12 +58,47 @@ namespace NESharp
             memory.WriteByte(0x4015, 0);
 
         }
-        public CPU(CPUMemory memory)
+        void negzero(byte value)
         {
-            this.memory = memory;
+            flagNegative = !(value >= 0x0 && value <= 0x7F);
+            flagZero = value == 0x00;
+        }
+        //LDA (Load Accumulator With Memory)
+        void LDA(ushort address)
+        {
+            AC = memory.ReadByte(address);
+            negzero(AC);
+        }
+        //LDX (Load X Index With Memory)
+        void LDX(ushort address)
+        {
+            XR = memory.ReadByte(address);
+            negzero(XR);
+        }
+        //LDY (Load Y Index With Memory)
+        void LDY(ushort address)
+        {
+            YR = memory.ReadByte(address);
+            negzero(YR);
+        }
+        //STA (Store Accumulator In Memory)
+        void STA(ushort address)
+        {
+            memory.WriteByte(address, AC);
+        }
+        //STX (Store X Index In Memory)
+        void STX(ushort address)
+        {
+            memory.WriteByte(address, XR);
+        }
+        //STY (Store Y Index In Memory)
+        void STY(ushort address)
+        {
+            memory.WriteByte(address, YR);
         }
 
+
     }
-    
-   
+
+
 }
