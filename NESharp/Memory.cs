@@ -40,7 +40,49 @@ using System.Threading.Tasks;
 // $FFFE–$FFFF 		2 bytes 		Address of Break (BRK instruction) handler routine
 namespace NESharp
 {
-    class Memory
+    interface ICartige
     {
+        byte ReadByte(ushort address);
+        void WriteByte(ushort address,byte valume);
+    }
+
+    abstract class Memory
+    {
+        abstract public byte ReadByte(ushort address);
+        abstract public void WriteByte(ushort address, byte valume);
+    }
+
+    class CPUMemory : Memory
+    {
+        byte[] zeroPage;
+        byte[] stack;
+        byte[] ram;
+        byte[] IORegister1;
+        byte[] IORegister2;
+        byte[] expasionROM;
+        byte[] sram;
+        byte[] PGR_ROM;
+
+        public CPUMemory()
+        {
+            zeroPage = new byte[256];
+            stack = new byte[256];
+            ram = new byte[1536];
+            IORegister1 = new byte[8];
+            IORegister2 = new byte[32];
+            expasionROM = new byte[8160];
+            sram = new byte[8192];
+            PGR_ROM = new byte[32768];
+        }
+
+        public override byte ReadByte(ushort address)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void WriteByte(ushort address, byte valume)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
