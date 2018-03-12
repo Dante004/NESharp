@@ -59,24 +59,26 @@ namespace NESharp
         byte[] ram;
         byte[] IORegister1;
         byte[] IORegister2;
-        byte[] expasionROM;
         byte[] sram;
         byte[] PGR_ROM;
 
-        public CPUMemory()
+        ICartige cartige;
+
+        public CPUMemory(ICartige cartige)
         {
             zeroPage = new byte[256];
             stack = new byte[256];
             ram = new byte[1536];
             IORegister1 = new byte[8];
             IORegister2 = new byte[32];
-            expasionROM = new byte[8160];
             sram = new byte[8192];
             PGR_ROM = new byte[32768];
+            this.cartige = cartige;
         }
 
         public override byte ReadByte(ushort address)
         {
+            #region RAM
             if (address >= 0x0000 && address <= 0x00FF)
             {
                 return zeroPage[address];
@@ -89,7 +91,9 @@ namespace NESharp
             {
                 return ram[address - 0x0200];
             }
-            else if(address >= 0x0800 && address <= 0x08FF)
+            #endregion
+            #region Mirror RAM
+            else if (address >= 0x0800 && address <= 0x08FF)
             {
                 return zeroPage[address - 0x0800];
             }
@@ -124,6 +128,44 @@ namespace NESharp
             else if (address >= 0x1A00 && address <= 0x1FFF)
             {
                 return ram[address - 0x1A00];
+            }
+            #endregion
+            #region I/O Register 1
+            else if (address>= 0x2000 && address <= 0x2007)
+            {
+                return IORegister1[address - 0x2000];
+            }
+            #endregion
+            #region Mirror I/O Register1
+            //TODO: Napisać mirrory do I/O
+            #endregion
+            #region I/O Register2
+            else if (address >= 0x4000 && address <= 0x401F)
+            {
+                return IORegister1[address - 0x4000];
+            }
+            #endregion
+            #region ROM
+            else if (address >= 0x4020 && address <= 0x5FFF)
+            {
+                return cartige.ReadByte(address);
+            }
+            #endregion
+            #region SRAM
+            else if (address >= 0x6000 && address <= 0x7FFF)
+            {
+                return sram[address - 0x6000];
+            }
+            #endregion
+            #region PGR-ROM
+            else if(address>=0x8000 && address<=0xFFFF)
+            {
+                return PGR_ROM[address - 0x8000];
+            }
+            #endregion
+            else
+            {
+                throw new Exception("Instruction isn't exist");
             }
         }
 
