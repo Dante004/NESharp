@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 //CPU speed										1.79 MHz	1.66 MHz
 namespace NESharp
 {
+    
+
     class CPU
     {
         /// Processor Flag
@@ -24,5 +26,36 @@ namespace NESharp
 		/// 6) Unused bit
 		/// 7) Overflow flag     - Set when an invalid two's complement number is the result of an operation. An example is adding 2 positive numbers which results in the sign bit being set, making the result a negative.
 		/// 8) Negative flag     - Set if the number is negative, determined by checking the sign bit (7th bit)
+        /// 
+        bool flagCarry, flagZero, flagInterrupt, flagDecimal, flagBreak, flagOverflow, flagNegative;
+        byte AC, XR, YR;
+        ushort PC, S;
+        int cycle;
+        public static CPUMemory memory = new CPUMemory();
+        public void PowerUp()
+        {
+            PC = 0x34;
+            AC = 0x0;
+            XR = 0x0;
+            YR = 0x0;
+
+            memory.WriteByte(0x4017);
+            memory.WriteByte(0x4015);
+            for (int i = 0x4000; i++, i<= 0x400F)
+            {
+                memory.WriteByte(i);
+            }
+        }
+        CPU()
+        {
+
+        }
+
+        CPU()
+        {
+
+        }
     }
+    
+   
 }
