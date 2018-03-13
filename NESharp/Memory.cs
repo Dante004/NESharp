@@ -46,132 +46,46 @@ namespace NESharp
         void WriteByte(ushort address,byte valume);
     }
 
-    abstract class Memory
+    class Memory
     {
-        abstract public byte ReadByte(ushort address);
-        abstract public void WriteByte(ushort address, byte valume);
-    }
-
-    class CPUMemory : Memory
-    {
-        byte[] zeroPage;
-        byte[] stack;
+        ICartige catrige;
         byte[] ram;
-        byte[] IORegister1;
-        byte[] IORegister2;
-        byte[] sram;
-        byte[] PGR_ROM;
 
-        ICartige cartige;
-
-        public CPUMemory(ICartige cartige)
+        public Memory()
         {
-            zeroPage = new byte[256];
-            stack = new byte[256];
-            ram = new byte[1536];
-            IORegister1 = new byte[8];
-            IORegister2 = new byte[32];
-            sram = new byte[8192];
-            PGR_ROM = new byte[32768];
-            this.cartige = cartige;
+            ram = new byte[2048];
         }
 
-        public override byte ReadByte(ushort address)
+        public byte ReadByte(ushort address)
         {
-            #region RAM
-            if (address >= 0x0000 && address <= 0x00FF)
+            byte data;
+            if(address < 0x2000)
             {
-                return zeroPage[address];
+                ushort addressIndex = HandleMirrorRAM(address);
+                data = ram[addressIndex];
             }
-            else if (address >= 0x0100 && address <= 0x01FF)
-            {
-                return stack[address - 0x0100];
-            }
-            else if (address >= 0x0200 && address <= 0x07FF)
-            {
-                return ram[address - 0x0200];
-            }
-            #endregion
-            #region Mirror RAM
-            else if (address >= 0x0800 && address <= 0x08FF)
-            {
-                return zeroPage[address - 0x0800];
-            }
-            else if (address >= 0x0900 && address <= 0x09FF)
-            {
-                return stack[address - 0x08900];
-            }
-            else if (address >= 0x0A00 && address <= 0x0FFF)
-            {
-                return ram[address - 0x0A00];
-            }
-            else if(address >=0x1000 && address <=0x10FF)
-            {
-                return zeroPage[address - 0x1000];
-            }
-            else if (address >= 0x1100 && address <= 0x11FF)
-            {
-                return stack[address - 0x1100];
-            }
-            else if (address >= 0x1200 && address <= 0x17FF)
-            {
-                return ram[address - 0x10FF];
-            }
-            else if (address >= 0x1800 && address <= 0x18FF)
-            {
-                return zeroPage[address - 0x1800];
-            }
-            else if (address >= 0x1900 && address <= 0x19FF)
-            {
-                return stack[address - 0x1900];
-            }
-            else if (address >= 0x1A00 && address <= 0x1FFF)
-            {
-                return ram[address - 0x1A00];
-            }
-            #endregion
-            #region I/O Register 1
-            else if (address>= 0x2000 && address <= 0x2007)
-            {
-                return IORegister1[address - 0x2000];
-            }
-            #endregion
-            #region Mirror I/O Register1
-            //TODO: Napisać mirrory do I/O
-            #endregion
-            #region I/O Register2
-            else if (address >= 0x4000 && address <= 0x401F)
-            {
-                return IORegister1[address - 0x4000];
-            }
-            #endregion
-            #region ROM
-            else if (address >= 0x4020 && address <= 0x5FFF)
-            {
-                return cartige.ReadByte(address);
-            }
-            #endregion
-            #region SRAM
-            else if (address >= 0x6000 && address <= 0x7FFF)
-            {
-                return sram[address - 0x6000];
-            }
-            #endregion
-            #region PGR-ROM
-            else if(address>=0x8000 && address<=0xFFFF)
-            {
-                return PGR_ROM[address - 0x8000];
-            }
-            #endregion
             else
             {
-                throw new Exception("Instruction isn't exist");
+                throw new Exception("Wrong address");
+            }
+            return data;
+        }
+        public void WriteByte(ushort address, byte valume)
+        {
+            if(address <0x2000)
+            {
+                ushort addressIndex = HandleMirrorRAM(address);
+                ram[addressIndex] = valume;
+            }
+            else
+            {
+                throw new Exception("Wrong address");
             }
         }
 
-        public override void WriteByte(ushort address, byte valume)
+        ushort HandleMirrorRAM(ushort address)
         {
-            throw new NotImplementedException();
+            return (ushort)(address & 0x800);
         }
     }
 }
