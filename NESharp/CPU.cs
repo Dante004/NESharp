@@ -280,6 +280,48 @@ namespace NESharp
             AC = byte.Parse((temp & 0xff).ToString());
         }
         #endregion
+
+        #region Bitwise
+
+        //AND   "AND" Memory with Accumulator
+        void AND(ushort address)
+        {
+            int src = memory.ReadByte(address);
+            src &= AC;
+            SET_SIGN(src);
+            SET_ZERO(src);
+            AC = byte.Parse(src.ToString());
+        }
+        //ASL   Shift Left One Bit (Memory or Accumulator)
+        void ASL(ushort address)
+        {
+            int src = memory.ReadByte(address);
+            SET_CARRY(bool.Parse((src & 0x80).ToString()));
+            src <<= 1;
+            src &= 0xff;
+            SET_SIGN(src);
+            SET_ZERO(src);
+            //TODO: STORE src in memory or accumulator depending on addressing mode.
+        }
+        //BIT   Test Bits in Memory with Accumulator
+        void BIT(ushort address)
+        {
+            int src = memory.ReadByte(address);
+            SET_SIGN(src);
+            SET_OVERFLOW(bool.Parse((0x40 & src).ToString()));   /* Copy bit 6 to OVERFLOW flag. */
+            SET_ZERO(src & AC);
+        }
+        //EOR   "Exclusive-Or" Memory with Accumulator
+        void EOR(ushort address)
+        {
+            int src = memory.ReadByte(address);
+            src ^= AC;
+            SET_SIGN(src);
+            SET_ZERO(src);
+            AC = byte.Parse(src.ToString());
+        }
+
+        #endregion
     }
 
 
