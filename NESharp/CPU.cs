@@ -26,10 +26,14 @@ namespace NESharp
 		/// 8) Negative flag     - Set if the number is negative, determined by checking the sign bit (7th bit)
         /// 
         bool flagCarry, flagZero, flagInterrupt, flagDecimal, flagBreak, flagOverflow, flagNegative;
-        byte AC, XR, YR;
-        ushort PC, S;
+        byte AC, XR, YR; //AC - accumulator, XR - X register, YR - Y register
+        ushort PC, S; //PC - program counter, S - stack pointer
         int cycle;
         public CPUMemory memory;
+        public CPU(CPUMemory memory)
+        {
+            this.memory = memory;
+        }
 
 
         public void PowerUp()
@@ -54,12 +58,83 @@ namespace NESharp
             memory.WriteByte(0x4015, 0);
 
         }
-        public CPU(CPUMemory memory)
+        void negzero(byte value)
         {
-            this.memory = memory;
+            flagNegative = !(value >= 0x0 && value <= 0x7F);
+            flagZero = value == 0x00;
         }
-
+        #region storage
+        //LDA (Load Accumulator With Memory)
+        void LDA(ushort address)
+        {
+            AC = memory.ReadByte(address);
+            negzero(AC);
+        }
+        //LDX (Load X Index With Memory)
+        void LDX(ushort address)
+        {
+            XR = memory.ReadByte(address);
+            negzero(XR);
+        }
+        //LDY (Load Y Index With Memory)
+        void LDY(ushort address)
+        {
+            YR = memory.ReadByte(address);
+            negzero(YR);
+        }
+        //STA (Store Accumulator In Memory)
+        void STA(ushort address)
+        {
+            memory.WriteByte(address, AC);
+        }
+        //STX (Store X Index In Memory)
+        void STX(ushort address)
+        {
+            memory.WriteByte(address, XR);
+        }
+        //STY (Store Y Index In Memory)
+        void STY(ushort address)
+        {
+            memory.WriteByte(address, YR);
+        }
+        //TAX (Transfer Accumulator to X Index)
+        void TAX()
+        {
+            negzero(AC);
+            XR = AC;
+        }
+        //TAY (Transfer Accumulator to Y Index)
+        void TAY()
+        {
+            negzero(AC);
+            YR = AC;
+        }
+        //TSX (Transfer Stack Pointer to X Index)
+        void TSX()
+        {
+            negzero(S);
+            XR = S;
+        }
+        //TXA (Transfer X Index to Accumulator)
+        void TXA()
+        {
+            negzero(XR);
+            AC = XR;
+        }
+        //TXS (Transfer X Index to Stack Pointer) 
+        void TXS()
+        {
+            negzero(XR);
+            S = XR;
+        }
+        //TYA (Transfer Y Index to Accumulator)
+        void TYA()
+        {
+            negzero(YR);
+            AC = YR;
+        }
+#endregion
     }
-    
-   
+
+
 }
