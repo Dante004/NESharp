@@ -29,8 +29,8 @@ namespace NESharp
         byte AC, XR, YR; //AC - accumulator, XR - X register, YR - Y register
         ushort PC, S; //PC - program counter, S - stack pointer
         int cycle;
-        public CPUMemory memory;
-        public CPU(CPUMemory memory)
+        public Memory memory;
+        public CPU(Memory memory)
         {
             this.memory = memory;
         }
@@ -112,8 +112,8 @@ namespace NESharp
         //TSX (Transfer Stack Pointer to X Index)
         void TSX()
         {
-            negzero(S);
-            XR = S;
+            negzero(XR);
+            XR = (byte)S;
         }
         //TXA (Transfer X Index to Accumulator)
         void TXA()
