@@ -27,7 +27,7 @@ namespace NESharp
         /// 
         bool flagCarry, flagZero, flagInterrupt, flagDecimal, flagBreak, flagOverflow, flagNegative;
         byte AC, XR, YR; //AC - accumulator, XR - X register, YR - Y register
-        ushort PC, S; //PC - program counter, S - stack pointer
+        ushort PC, SP; //PC - program counter, SP - stack pointer
         int cycle;
         public Memory memory;
         public CPU(Memory memory)
@@ -53,7 +53,7 @@ namespace NESharp
         }
         public void Reset()
         {
-            S -= 3;
+            SP -= 3;
             flagInterrupt = true;
             memory.WriteByte(0x4015, 0);
 
@@ -63,6 +63,31 @@ namespace NESharp
             flagNegative = !(value >= 0x0 && value <= 0x7F);
             flagZero = value == 0x00;
         }
+        #region INSTRUCTION OPERATION
+
+        void SET_ZERO(int x)
+        {
+            flagZero = x == 0;
+        }
+
+        void SET_SIGN(int x)
+        {
+            flagNegative = !(x >= 0x0 && x <= 0x7F);
+        }
+
+        void SET_OVERFLOW(bool x)
+        {
+            flagOverflow = x == true;
+        }
+
+        void SET_CARRY(bool x)
+        {
+            flagCarry = x == true;
+        }
+
+#endregion
+
+
         #region storage
         //LDA (Load Accumulator With Memory)
         void LDA(ushort address)
@@ -113,7 +138,7 @@ namespace NESharp
         void TSX()
         {
             negzero(XR);
-            XR = (byte)S;
+            XR = (byte)SP;
         }
         //TXA (Transfer X Index to Accumulator)
         void TXA()
@@ -125,7 +150,7 @@ namespace NESharp
         void TXS()
         {
             negzero(XR);
-            S = XR;
+            SP = XR;
         }
         //TYA (Transfer Y Index to Accumulator)
         void TYA()
@@ -133,7 +158,108 @@ namespace NESharp
             negzero(YR);
             AC = YR;
         }
-#endregion
+        #endregion
+
+        #region Math
+
+        //ADC   Add Memory to Accumulator with Carry
+        void ADC (ushort address)
+        {
+            int src = memory.ReadByte(address);
+            int temp = src + AC + (flagCarry ? 1 : 0);
+            SET_ZERO(temp & 0xFF);
+            if (flagDecimal)
+            {
+                if (((AC & 0xF) + (src & 0xF) + (flagCarry ? 1 : 0)) > 9)
+                    temp += 6;
+                SET_SIGN(temp);
+                SET_OVERFLOW(!bool.Parse(((AC ^ src) & 0x80).ToString()) && bool.Parse(((AC ^ temp) & 0x80).ToString()));
+                if (temp > 0x99)
+                { 
+                temp += 96;
+                SET_CARRY(temp > 0x99);
+                }
+            }
+            else
+            {
+                SET_SIGN(temp);
+                SET_OVERFLOW(!bool.Parse(((AC ^ src) & 0x80).ToString()) && bool.Parse(((AC ^ temp) & 0x80).ToString()));
+                SET_CARRY(temp > 0xff);
+            }
+            AC = (byte.Parse(temp.ToString()));
+        }
+        //DEC   Decrement Memory by One
+        void DEC(ushort address)
+        {
+            int src = memory.ReadByte(address);
+            src = (src - 1) & 0xff;
+            SET_SIGN(src);
+            SET_ZERO(src);
+            memory.WriteByte(address, byte.Parse(src.ToString()));
+            
+        }
+        //DEX   Decrement Index X by One
+        void DEX(ushort address)
+        {
+            int src = XR;
+            src = (src - 1) & 0xff;
+            SET_SIGN(src);
+            SET_ZERO(src);
+            XR = (byte.Parse(src.ToString()));
+        }
+        //DEY   Decrement Index Y by One
+        void DEY(ushort address)
+        {
+            int src = YR;
+            src = (src - 1) & 0xff;
+            SET_SIGN(src);
+            SET_ZERO(src);
+            YR = (byte.Parse(src.ToString()));
+        }
+        //INC   Increment Memory by One
+        void INC(ushort address)
+        {
+            int src = memory.ReadByte(address);
+            src = (src + 1) & 0xff;
+            SET_SIGN(src);
+            SET_ZERO(src);
+            memory.WriteByte(address, byte.Parse(src.ToString()));
+        }
+        //INX   Increment Index X by One
+        void INX(ushort address)
+        {
+            int src = XR;
+            src = (src + 1) & 0xff;
+            SET_SIGN(src);
+            SET_ZERO(src);
+            XR = (byte.Parse(src.ToString()));
+        }
+        //INY   Increment Index Y by One
+        void INY(ushort address)
+        {
+            int src = YR;
+            src = (src + 1) & 0xff;
+            SET_SIGN(src);
+            SET_ZERO(src);
+            YR = (byte.Parse(src.ToString()));
+        }
+        //SBC   Subtract Memory from Accumulator with Borrow  
+        void SBC(ushort address)
+        {
+            int src = memory.ReadByte(address);
+            int temp = AC - src - (flagCarry ? 0 : 1);
+            SET_SIGN(temp);
+            SET_ZERO(temp & 0xff);  /* Sign and Zero are invalid in decimal mode */
+            SET_OVERFLOW(bool.Parse(((AC ^ temp) & 0x80).ToString()) && bool.Parse(((AC ^ src) & 0x80).ToString()));
+            if (flagDecimal)
+            {
+                if (((AC & 0xf) - (flagCarry ? 0 : 1)) < (src & 0xf)) /* EP */ temp -= 6;
+                if (temp > 0x99) temp -= 0x60;
+            }
+            SET_CARRY(temp < 0x100);
+            AC = byte.Parse((temp & 0xff).ToString());
+        }
+        #endregion
     }
 
 
