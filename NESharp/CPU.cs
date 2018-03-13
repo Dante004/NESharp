@@ -84,6 +84,26 @@ namespace NESharp
         {
             flagCarry = x == true;
         }
+        bool IF_CARRY()
+        {
+            return flagCarry;
+        }
+        bool IF_OVERFLOW()
+        {
+            return flagOverflow;
+        }
+        bool IF_SIGN()
+        {
+            return flagNegative;
+        }
+        bool IF_ZERO()
+        {
+            return flagZero;
+        }
+        bool IF_DECIMAL()
+        {
+            return flagDecimal;
+        }
 
 #endregion
 
