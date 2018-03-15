@@ -29,8 +29,8 @@ namespace NESharp
         byte AC, XR, YR; //AC - accumulator, XR - X register, YR - Y register
         ushort PC, SP; //PC - program counter, SP - stack pointer
         int cycle;
-        public Memory memory;
-        public CPU(Memory memory)
+        public CPUMemory memory;
+        public CPU(CPUMemory memory)
         {
             this.memory = memory;
         }

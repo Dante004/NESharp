@@ -40,52 +40,19 @@ using System.Threading.Tasks;
 // $FFFE–$FFFF 		2 bytes 		Address of Break (BRK instruction) handler routine
 namespace NESharp
 {
-    interface ICartige
+    abstract class Memory
     {
-        byte ReadByte(ushort address);
-        void WriteByte(ushort address,byte valume);
+        abstract public byte ReadByte(ushort address);
+        abstract public void WriteByte(ushort address, byte valume);
     }
 
-    class Memory
+    class CPUMemory:Memory
     {
-        ICartige catrige;
-        byte[] ram;
 
-        public Memory()
-        {
-            ram = new byte[2048];
-        }
+    }
 
-        public byte ReadByte(ushort address)
-        {
-            byte data;
-            if(address < 0x2000)
-            {
-                ushort addressIndex = HandleMirrorRAM(address);
-                data = ram[addressIndex];
-            }
-            else
-            {
-                throw new Exception("Wrong address");
-            }
-            return data;
-        }
-        public void WriteByte(ushort address, byte valume)
-        {
-            if(address <0x2000)
-            {
-                ushort addressIndex = HandleMirrorRAM(address);
-                ram[addressIndex] = valume;
-            }
-            else
-            {
-                throw new Exception("Wrong address");
-            }
-        }
+    class PPUMemory : Memory
+    {
 
-        ushort HandleMirrorRAM(ushort address)
-        {
-            return (ushort)(address & 0x800);
-        }
     }
 }
