@@ -60,12 +60,18 @@ namespace NESharp
             Array.Clear(ram, 0, ram.Length);
         }
 
+
+        ushort HandleMirrorRam(ushort address)
+        {
+            return (ushort)(address % 0x800);
+        }
+
         public override byte ReadByte(ushort address)
         {
             byte data;
             if(address < 0x2000)
             {
-                data = ram[address];
+                data = ram[HandleMirrorRam(address)];
             }
             else
             {
@@ -78,7 +84,7 @@ namespace NESharp
         {
             if(address < 0x2000)
             {
-                ram[address] = valume;
+                ram[HandleMirrorRam(address)] = valume;
             }
             else
             {

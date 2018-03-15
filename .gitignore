@@ -6,3 +6,4 @@
 .vs/NESharp/v15/Server/sqlite3/storage.ide-shm
 .vs/NESharp/v15/Server/sqlite3/storage.ide-wal
 .vs/NESharp/v15/Server/sqlite3/storage.ide-wal
+*.ide-wal
