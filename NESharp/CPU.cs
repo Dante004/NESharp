@@ -320,7 +320,48 @@ namespace NESharp
             SET_ZERO(src);
             AC = byte.Parse(src.ToString());
         }
-
+        //LSR   Shift Right One Bit (Memory or Accumulator)
+        void LSR(ushort address)
+        {
+            int src = memory.ReadByte(address);
+            SET_CARRY(bool.Parse((src & 0x01).ToString()));
+            src >>= 1;
+            SET_SIGN(src);
+            SET_ZERO(src);
+            //TODO: STORE src in memory or accumulator depending on addressing mode.
+        }
+        //ORA   "OR" Memory with Accumulator
+        void ORA(ushort address)
+        {
+            int src = memory.ReadByte(address);
+            src |= AC;
+            SET_SIGN(src);
+            SET_ZERO(src);
+            AC = byte.Parse(src.ToString());
+        }
+        //ROL   Rotate One Bit Left (Memory or Accumulator)
+        void ROL(ushort address)
+        {
+            int src = memory.ReadByte(address);
+            src <<= 1;
+            if (IF_CARRY()) src |= 0x1;
+            SET_CARRY(src > 0xff);
+            src &= 0xff;
+            SET_SIGN(src);
+            SET_ZERO(src);
+            //TODO: STORE src in memory or accumulator depending on addressing mode.
+        }
+        //ROR   Rotate One Bit Right (Memory or Accumulator)
+        void ROR(ushort address)
+        {
+            int src = memory.ReadByte(address);
+            if (IF_CARRY()) src |= 0x100;
+            SET_CARRY(bool.Parse((src & 0x01).ToString()));
+            src >>= 1;
+            SET_SIGN(src);
+            SET_ZERO(src);
+            //TODO: STORE src in memory or accumulator depending on addressing mode.
+        }
         #endregion
     }
 

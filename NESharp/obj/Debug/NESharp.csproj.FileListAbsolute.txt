@@ -1,3 +1,6 @@
 C:\Users\Mortar\Documents\GitHub\NESharp\NESharp\obj\Debug\NESharp.csprojResolveAssemblyReference.cache
 C:\Users\Mortar\Documents\GitHub\NESharp\NESharp\obj\Debug\NESharp.Properties.Resources.resources
 C:\Users\Mortar\Documents\GitHub\NESharp\NESharp\obj\Debug\NESharp.csproj.GenerateResource.Cache
+D:\NESharp\NESharp\obj\Debug\NESharp.csprojResolveAssemblyReference.cache
+D:\NESharp\NESharp\obj\Debug\NESharp.Properties.Resources.resources
+D:\NESharp\NESharp\obj\Debug\NESharp.csproj.GenerateResource.Cache
