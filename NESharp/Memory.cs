@@ -48,11 +48,55 @@ namespace NESharp
 
     class CPUMemory:Memory
     {
+        byte[] ram;
 
+        public CPUMemory()
+        {
+            ram = new byte[2048];
+        }
+
+        public void Reset()
+        {
+            Array.Clear(ram, 0, ram.Length);
+        }
+
+        public override byte ReadByte(ushort address)
+        {
+            byte data;
+            if(address < 0x2000)
+            {
+                data = ram[address];
+            }
+            else
+            {
+                throw new Exception("Wrong address");
+            }
+            return data;
+        }
+
+        public override void WriteByte(ushort address, byte valume)
+        {
+            if(address < 0x2000)
+            {
+                ram[address] = valume;
+            }
+            else
+            {
+                throw new Exception("Wrong address");
+            }
+        }
     }
 
     class PPUMemory : Memory
     {
+        public override byte ReadByte(ushort address)
+        {
+            throw new NotImplementedException();
+        }
 
+        public override void WriteByte(ushort address, byte valume)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
