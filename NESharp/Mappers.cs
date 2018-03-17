@@ -17,7 +17,7 @@ namespace NESharp
 
     abstract class Mappers
     {
-        VramMirroring vramMirroring;
+        protected VramMirroring vramMirroring;
 
         public int VRamAddressToIndex(ushort address)
         {
@@ -55,6 +55,11 @@ namespace NESharp
 
     class NROM : Mappers
     {
+        public NROM()
+        {
+
+        }
+
 
 
         public override byte ReadByte(ushort address)
