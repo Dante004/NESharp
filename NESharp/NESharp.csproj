@@ -45,6 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cartrige.cs" />
+    <Compile Include="Console.cs" />
     <Compile Include="CPU.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
