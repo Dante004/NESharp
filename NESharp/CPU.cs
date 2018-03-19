@@ -63,7 +63,7 @@ namespace NESharp
             flagNegative = !(value >= 0x0 && value <= 0x7F);
             flagZero = value == 0x00;
         }
-#region INSTRUCTION OPERATION
+        #region INSTRUCTION OPERATION
 
         void SET_ZERO(int x)
         {
@@ -135,9 +135,9 @@ namespace NESharp
             SP--;
         }
 
-#endregion
+        #endregion
 
-#region storage
+        #region storage
         //LDA (Load Accumulator With Memory)
         void LDA(ushort address)
         {
@@ -209,10 +209,10 @@ namespace NESharp
         }
         #endregion
 
-#region Math
+        #region Math
 
         //ADC   Add Memory to Accumulator with Carry
-        void ADC (ushort address)
+        void ADC(ushort address)
         {
             byte src = memory.ReadByte(address);
             byte carry = (byte)(flagCarry ? 1 : 0);
@@ -230,7 +230,7 @@ namespace NESharp
             SET_SIGN(src);
             SET_ZERO(src);
             memory.WriteByte(address, src);
-            
+
         }
         //DEX   Decrement Index X by One
         void DEX(ushort address)
@@ -291,7 +291,7 @@ namespace NESharp
         }
         #endregion
 
-#region Bitwise
+        #region Bitwise
 
         //AND   "AND" Memory with Accumulator
         void AND(ushort address)
@@ -377,7 +377,7 @@ namespace NESharp
         }
         #endregion
 
-#region Branch
+        #region Branch
 
         //BCC   Branch on Carry Clear
         void BCC(ushort address)
@@ -462,7 +462,7 @@ namespace NESharp
         }
         #endregion
 
-#region Jump
+        #region Jump
 
         //JMP   Jump to New Location
         void JMP(ushort address)
@@ -500,7 +500,7 @@ namespace NESharp
         }
         #endregion
 
-#region Registers
+        #region Registers
 
         //CLC   Clear Carry Flag
         void CLC()
@@ -565,6 +565,64 @@ namespace NESharp
             SET_INTERRUPT(true);
         }
         #endregion
+
+        #region Stack
+
+        //PHA   Push Accumulator on Stack
+        void PHA()
+        {
+            byte src;
+            src = AC;
+            PUSH(src);
+        }
+
+        //PHP   Push Processor Status on Stack
+        void PHP()
+        {
+            //TODO: get_sr
+            byte src;
+            src = GET_SR;
+            PUSH(src);
+        }
+
+        //PLA   Pull Accumulator from Stack
+        void PLA()
+        {
+            byte src;
+            src = PULL();
+            SET_SIGN(src);  /* Change sign and zero flag accordingly. */
+            SET_ZERO(src);
+        }
+
+        //PLP   Pull Processor Status from Stack
+        void PLP()
+        {
+            //TODO: set_sr
+            byte src;
+            src = PULL();
+            SET_SR((src));
+        }
+        #endregion
+
+        #region System
+
+        //BRK   Force Break
+        void BRK()
+        {
+            PC++;
+            PUSH((byte)((PC >> 8) & 0xff)); /* Push return address onto the stack. */
+            PUSH((byte)(PC & 0xff));
+            SET_BREAK((true));             /* Set BFlag before pushing */
+            PUSH(SR);
+            SET_INTERRUPT((true));
+            PC = (ushort)(memory.ReadByte(0xFFFE) | (memory.ReadByte(0xFFFF) << 8));
+        }
+        //NOP   No Operation
+        void NOP() { }
+
+        #endregion
+
+
     }
 
 
