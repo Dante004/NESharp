@@ -19,6 +19,8 @@ namespace NESharp
     {
         protected VramMirroring vramMirroring;
 
+        protected Console console;
+
         public int VRamAddressToIndex(ushort address)
         {
             int index = (address - 0x2000) % 0x1000;
@@ -50,26 +52,47 @@ namespace NESharp
         }
 
         abstract public byte ReadByte(ushort address);
-        abstract public byte WriteByte(ushort address, byte valume);
+        abstract public void WriteByte(ushort address, byte valume);
     }
 
     class NROM : Mappers
     {
-        public NROM()
+        public NROM(Console console)
         {
-
+            this.console = console;
+            vramMirroring = console.cartridge.verticalVRAMMirroring ? VramMirroring.Vertical : VramMirroring.Horizontal;
         }
 
-
+        int AddressToIndex(ushort address)
+        {
+            ushort mappedAddress = (ushort)(address - 0x8000);
+            return console.cartridge.pgrRomBanks == 1 ? mappedAddress%16384:mappedAddress;
+        }
 
         public override byte ReadByte(ushort address)
         {
-            throw new NotImplementedException();
+            byte data;
+            if(address<0x2000)
+            {
+                data = console.cartridge.ReadCHR(address);
+            }
+            else if (address>=0x8000)
+            {
+                data = console.cartridge.ReadPGRROM(AddressToIndex(address));
+            }
+            else
+            {
+                data = 0;
+            }
+            return data;
         }
 
-        public override byte WriteByte(ushort address, byte valume)
+        public override void WriteByte(ushort address, byte valume)
         {
-            throw new NotImplementedException();
+            if(address<0x2000)
+            {
+                console.cartridge.WriteCHR(address, valume);
+            }
         }
     }
 

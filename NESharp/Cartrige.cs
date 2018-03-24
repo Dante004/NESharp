@@ -10,7 +10,7 @@ namespace NESharp
         byte[] chrROM;
         byte[] pgrRAM;
         //How many PGR ROM has banks 16kB
-        int pgrRomBanks;
+        public int pgrRomBanks;
         //How many CHR ROM has banks 8kB
         int chrRomBanks;
         bool useChrRAM;

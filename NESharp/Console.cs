@@ -11,6 +11,7 @@ namespace NESharp
         CPU cpu;
         CPUMemory cpuMemory;
         Mappers mapper;
+        public Cartridge cartridge;
 
         public Console()
         {
