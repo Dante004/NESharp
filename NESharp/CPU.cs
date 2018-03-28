@@ -80,9 +80,13 @@ namespace NESharp
             flagOverflow = x > 255;
         }
 
+        void SET_CARRY(int x)
+        {
+            flagCarry = x != 0;
+        }
         void SET_CARRY(bool x)
         {
-            flagCarry = x == true;
+            flagCarry = x;
         }
         void SET_DECIMAL(bool x)
         {
