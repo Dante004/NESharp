@@ -138,6 +138,37 @@ namespace NESharp
             memory.WriteByte((ushort)(0x100 | SP), data);
             SP--;
         }
+        //GET_SR    get the value of the Program Status Register.
+        byte GET_SR()
+        {
+            byte flags = 0;
+
+            if (flagCarry) flags |= (byte)(1 << 0); // Carry flag, bit 0
+            if (flagZero) flags |= (byte)(1 << 1); // Zero flag, bit 1
+            if (flagInterrupt) flags |= (byte)(1 << 2); // Interrupt disable flag, bit 2
+            if (flagDecimal) flags |= (byte)(1 << 3); // Decimal mode flag, bit 3
+            if (flagBreak) flags |= (byte)(1 << 4); // Break mode, bit 4
+            flags |= (byte)(1 << 5); // Bit 5, always set
+            if (flagOverflow) flags |= (byte)(1 << 6); // Overflow flag, bit 6
+            if (flagNegative) flags |= (byte)(1 << 7); // Negative flag, bit 7
+
+            return flags;
+        }
+        bool GetBit(byte b, int bitNumber)
+        {
+            return (b & (1 << bitNumber)) != 0;
+        }
+        //SET_SR    set the Program Status Register to the value given.
+        void SET_SR(byte flags)
+        {
+            flagCarry = GetBit(flags, 0);
+            flagZero = GetBit(flags, 1);
+            flagInterrupt = GetBit(flags, 2);
+            flagDecimal = GetBit(flags, 3);
+            flagBreak = GetBit(flags, 4);
+            flagOverflow = GetBit(flags, 6);
+            flagNegative = GetBit(flags, 7);
+        }
 
         #endregion
 
@@ -585,7 +616,7 @@ namespace NESharp
         {
             //TODO: get_sr
             byte src;
-            src = GET_SR;
+            src = GET_SR();
             PUSH(src);
         }
 
@@ -617,7 +648,7 @@ namespace NESharp
             PUSH((byte)((PC >> 8) & 0xff)); /* Push return address onto the stack. */
             PUSH((byte)(PC & 0xff));
             SET_BREAK((true));             /* Set BFlag before pushing */
-            PUSH(SR);
+            PUSH(GET_SR());
             SET_INTERRUPT((true));
             PC = (ushort)(memory.ReadByte(0xFFFE) | (memory.ReadByte(0xFFFF) << 8));
         }
