@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 // [0xFFFC]			- Vector address for RESET (low byte)
 // [0xFFFD]			- Vector address for RESET (high byte)
 // [0xFFFE]			- Vector address for IRQ & BRK (low byte)
-// [0xFFFF]			- Vector address for IRQ & BRK  (high byte)     
+// [0xFFFF]			- Vector address for IRQ & BRK  (high byte)
 
 // Address Range  	Size 			Notes (Page size is 256 bytes)
 // $0000–$00FF 		256 bytes 		Zero Page — Special Zero Page addressing modes give faster memory read/write access
@@ -40,15 +40,16 @@ using System.Threading.Tasks;
 // $FFFE–$FFFF 		2 bytes 		Address of Break (BRK instruction) handler routine
 namespace NESharp
 {
-    abstract class Memory
+    internal abstract class Memory
     {
         abstract public byte ReadByte(ushort address);
+
         abstract public void WriteByte(ushort address, byte valume);
     }
 
-    class CPUMemory:Memory
+    internal class CPUMemory : Memory
     {
-        byte[] ram;
+        private byte[] ram;
 
         public CPUMemory()
         {
@@ -60,8 +61,7 @@ namespace NESharp
             Array.Clear(ram, 0, ram.Length);
         }
 
-
-        ushort HandleMirrorRam(ushort address)
+        private ushort HandleMirrorRam(ushort address)
         {
             return (ushort)(address % 0x800);
         }
@@ -69,7 +69,7 @@ namespace NESharp
         public override byte ReadByte(ushort address)
         {
             byte data;
-            if(address < 0x2000)
+            if (address < 0x2000)
             {
                 data = ram[HandleMirrorRam(address)];
             }
@@ -82,7 +82,7 @@ namespace NESharp
 
         public override void WriteByte(ushort address, byte valume)
         {
-            if(address < 0x2000)
+            if (address < 0x2000)
             {
                 ram[HandleMirrorRam(address)] = valume;
             }
@@ -91,9 +91,16 @@ namespace NESharp
                 throw new Exception("Wrong address");
             }
         }
+
+        public ushort ReadByte16(ushort address)
+        {
+            byte lo = ReadByte(address);
+            byte hi = ReadByte((ushort)(address + 1));
+            return (ushort)((hi << 8) | lo);
+        }
     }
 
-    class PPUMemory : Memory
+    internal class PPUMemory : Memory
     {
         public override byte ReadByte(ushort address)
         {
