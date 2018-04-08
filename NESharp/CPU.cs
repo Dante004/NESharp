@@ -86,7 +86,7 @@ namespace NESharp
                     ORA(Immediate());
                     break;
                 case 0x0a:
-                    ASL(AC);
+                    ASL();
                     break;
                 case 0x0d:
                     ORA(Absolute());
@@ -140,7 +140,7 @@ namespace NESharp
                     AND(Immediate());
                     break;
                 case 0x2a:
-                    ROL(AC);
+                    ROL();
                     break;
                 case 0x2c:
                     BIT(Absolute());
@@ -194,7 +194,7 @@ namespace NESharp
                     EOR(Immediate());
                     break;
                 case 0x4a:
-                    LSR(AC);
+                    LSR();
                     break;
                 case 0x4c:
                     JMP(AC);
@@ -248,7 +248,7 @@ namespace NESharp
                     ADC(Immediate());
                     break;
                 case 0x6a:
-                    ROR(AC);
+                    ROR();
                     break;
                 case 0x6c:
                     JMP(Indirect());
@@ -412,7 +412,7 @@ namespace NESharp
                 case 0xc1:
                     CMP(IndexedIndirect());
                     break;
-                case oxc4:
+                case 0xc4:
                     CPY(ZeroPage());
                     break;
                 case 0xc5:
@@ -844,14 +844,21 @@ namespace NESharp
         //ASL   Shift Left One Bit (Memory or Accumulator)
         private void ASL(ushort address)
         {
-            //TODO:Repair ASL
             byte src = memory.ReadByte(address);
             SET_CARRY(src & 0x80);
             src <<= 1;
             src &= 0xff;
             SET_SIGN(src);
             SET_ZERO(src);
-            //TODO: STORE src in memory or accumulator depending on addressing mode.
+        }
+        private void ASL()
+        {
+            byte src = AC;
+            SET_CARRY(src & 0x80);
+            src <<= 1;
+            src &= 0xff;
+            SET_SIGN(src);
+            SET_ZERO(src);
         }
 
         //BIT   Test Bits in Memory with Accumulator
@@ -876,13 +883,19 @@ namespace NESharp
         //LSR   Shift Right One Bit (Memory or Accumulator)
         private void LSR(ushort address)
         {
-            //TODO: repair LSR
             byte src = memory.ReadByte(address);
             SET_CARRY(src & 0x01);
             src >>= 1;
             SET_SIGN(src);
             SET_ZERO(src);
-            //TODO: STORE src in memory or accumulator depending on addressing mode.
+        }
+        private void LSR()
+        {
+            byte src = AC;
+            SET_CARRY(src & 0x01);
+            src >>= 1;
+            SET_SIGN(src);
+            SET_ZERO(src);
         }
 
         //ORA   "OR" Memory with Accumulator
@@ -905,20 +918,40 @@ namespace NESharp
             src &= 0xff;
             SET_SIGN(src);
             SET_ZERO(src);
-            //TODO: STORE src in memory or accumulator depending on addressing mode.
+        }
+        private void ROL()
+        {
+            byte src = AC;
+            src <<= 1;
+            if (IF_CARRY()) src |= 0x1;
+            SET_CARRY(src > 0xff);
+            src &= 0xff;
+            SET_SIGN(src);
+            SET_ZERO(src);
         }
 
         //ROR   Rotate One Bit Right (Memory or Accumulator)
         private void ROR(ushort address)
         {
-            //TODO: repair ROR
             byte src = memory.ReadByte(address);
-            if (IF_CARRY()) src |= 0x100;
+            ushort src2 = (ushort)src;
+            if (IF_CARRY()) src2 |= (ushort)0x100;
+            src = (byte)src2;
             SET_CARRY(src & 0x01);
             src >>= 1;
             SET_SIGN(src);
             SET_ZERO(src);
-            //TODO: STORE src in memory or accumulator depending on addressing mode.
+        }
+        private void ROR()
+        {
+            byte src = AC;
+            ushort src2 = (ushort)src;
+            if (IF_CARRY()) src2 |= (ushort)0x100;
+            src = (byte)src2;
+            SET_CARRY(src & 0x01);
+            src >>= 1;
+            SET_SIGN(src);
+            SET_ZERO(src);
         }
 
         #endregion Bitwise
@@ -1047,9 +1080,9 @@ namespace NESharp
         }
 
         //RTS   Return from Subroutine
-        private void RTS(ushort address)
+        private void RTS()
         {
-            byte src = memory.ReadByte(address);
+            byte src;
             src = PULL();
             src += (byte)(((PULL()) << 8) + 1); /* Load return address from stack and add 1. */
             PC = (src);
@@ -1146,7 +1179,6 @@ namespace NESharp
         //PHP   Push Processor Status on Stack
         private void PHP()
         {
-            //TODO: get_sr
             byte src;
             src = GET_SR();
             PUSH(src);
@@ -1164,7 +1196,6 @@ namespace NESharp
         //PLP   Pull Processor Status from Stack
         private void PLP()
         {
-            //TODO: set_sr
             byte src;
             src = PULL();
             SET_SR((src));
