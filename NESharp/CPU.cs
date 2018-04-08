@@ -64,6 +64,467 @@ namespace NESharp
         {
             byte opCode = memory.ReadByte(PC);
             ushort address = 0;
+
+            switch (opCode)
+            {
+                case 0x00:
+                    BRK();
+                    break;
+                case 0x01:
+                    ORA(IndexedIndirect());
+                    break;
+                case 0x05:
+                    ORA(ZeroPage());
+                    break;
+                case 0x06:
+                    ASL(ZeroPage());
+                    break;
+                case 0x08:
+                    PHP();
+                    break;
+                case 0x09:
+                    ORA(Immediate());
+                    break;
+                case 0x0a:
+                    ASL(AC);
+                    break;
+                case 0x0d:
+                    ORA(Absolute());
+                    break;
+                case 0x0e:
+                    ASL(Absolute());
+                    break;
+                case 0x10:
+                    BPL(Relative());
+                    break;
+                case 0x11:
+                    ORA(IndirectIndexed());
+                    break;
+                case 0x15:
+                    ORA(ZeroPageX());
+                    break;
+                case 0x16:
+                    ASL(ZeroPageX());
+                    break;
+                case 0x18:
+                    CLC();
+                    break;
+                case 0x19:
+                    ORA(AbsoluteY());
+                    break;
+                case 0x1d:
+                    ORA(AbsoluteX());
+                    break;
+                case 0x1e:
+                    ASL(AbsoluteX());
+                    break;
+                case 0x20:
+                    JSR(Absolute());
+                    break;
+                case 0x21:
+                    AND(IndexedIndirect());
+                    break;
+                case 0x24:
+                    BIT(ZeroPage());
+                    break;
+                case 0x25:
+                    AND(ZeroPage());
+                    break;
+                case 0x26:
+                    ROL(ZeroPage());
+                    break;
+                case 0x28:
+                    PLP();
+                    break;
+                case 0x29:
+                    AND(Immediate());
+                    break;
+                case 0x2a:
+                    ROL(AC);
+                    break;
+                case 0x2c:
+                    BIT(Absolute());
+                    break;
+                case 0x2d:
+                    AND(Absolute());
+                    break;
+                case 0x2e:
+                    ROL(Absolute());
+                    break;
+                case 0x30:
+                    BMI(Relative());
+                    break;
+                case 0x31:
+                    AND(IndirectIndexed());
+                    break;
+                case 0x35:
+                    AND(ZeroPageX());
+                    break;
+                case 0x36:
+                    ROL(ZeroPageX());
+                    break;
+                case 0x38:
+                    SEC();
+                    break;
+                case 0x39:
+                    AND(AbsoluteY());
+                    break;
+                case 0x3d:
+                    AND(AbsoluteX());
+                    break;
+                case 0x3e:
+                    ROL(AbsoluteX());
+                    break;
+                case 0x40:
+                    RTI();
+                    break;
+                case 0x41:
+                    EOR(IndexedIndirect());
+                    break;
+                case 0x45:
+                    EOR(ZeroPage());
+                    break;
+                case 0x46:
+                    LSR(ZeroPage());
+                    break;
+                case 0x48:
+                    PHA();
+                    break;
+                case 0x49:
+                    EOR(Immediate());
+                    break;
+                case 0x4a:
+                    LSR(AC);
+                    break;
+                case 0x4c:
+                    JMP(AC);
+                    break;
+                case 0x4d:
+                    EOR(Absolute());
+                    break;
+                case 0x4e:
+                    LSR(Absolute());
+                    break;
+                case 0x50:
+                    BVC(Relative());
+                    break;
+                case 0x51:
+                    EOR(IndirectIndexed());
+                    break;
+                case 0x55:
+                    EOR(ZeroPageX());
+                    break;
+                case 0x56:
+                    LSR(ZeroPageX());
+                    break;
+                case 0x58:
+                    CLI();
+                    break;
+                case 0x59:
+                    EOR(AbsoluteY());
+                    break;
+                case 0x5d:
+                    EOR(AbsoluteX());
+                    break;
+                case 0x5e:
+                    LSR(AbsoluteX());
+                    break;
+                case 0x60:
+                    RTS();
+                    break;
+                case 0x61:
+                    ADC(IndexedIndirect());
+                    break;
+                case 0x65:
+                    ADC(ZeroPage());
+                    break;
+                case 0x66:
+                    ROR(ZeroPage());
+                    break;
+                case 0x68:
+                    PLA();
+                    break;
+                case 0x69:
+                    ADC(Immediate());
+                    break;
+                case 0x6a:
+                    ROR(AC);
+                    break;
+                case 0x6c:
+                    JMP(Indirect());
+                    break;
+                case 0x6d:
+                    ADC(Absolute());
+                    break;
+                case 0x6e:
+                    ROR(AbsoluteX());
+                    break;
+                case 0x70:
+                    BVS(Relative());
+                    break;
+                case 0x71:
+                    ADC(IndirectIndexed());
+                    break;
+                case 0x75:
+                    ADC(ZeroPageX());
+                    break;
+                case 0x76:
+                    ROR(ZeroPageX());
+                    break;
+                case 0x78:
+                    SEI();
+                    break;
+                case 0x79:
+                    ADC(AbsoluteY());
+                    break;
+                case 0x7d:
+                    ADC(AbsoluteX());
+                    break;
+                case 0x7e:
+                    ROR(Absolute());
+                    break;
+                case 0x81:
+                    STA(IndexedIndirect());
+                    break;
+                case 0x84:
+                    STY(ZeroPage());
+                    break;
+                case 0x85:
+                    STA(ZeroPage());
+                    break;
+                case 0x86:
+                    STX(ZeroPage());
+                    break;
+                case 0x88:
+                    DEY();
+                    break;
+                case 0x8a:
+                    TXA();
+                    break;
+                case 0x8c:
+                    STY(Absolute());
+                    break;
+                case 0x8d:
+                    STA(Absolute());
+                    break;
+                case 0x8e:
+                    STX(Absolute());
+                    break;
+                case 0x90:
+                    BCC(Relative());
+                    break;
+                case 0x91:
+                    STA(IndirectIndexed());
+                    break;
+                case 0x94:
+                    STY(ZeroPageX());
+                    break;
+                case 0x95:
+                    STA(ZeroPageX());
+                    break;
+                case 0x96:
+                    STX(ZeroPageY());
+                    break;
+                case 0x98:
+                    TYA();
+                    break;
+                case 0x99:
+                    STA(AbsoluteY());
+                    break;
+                case 0x9a:
+                    TXS();
+                    break;
+                case 0x9d:
+                    STA(AbsoluteX());
+                    break;
+                case 0xa0:
+                    LDY(Immediate());
+                    break;
+                case 0xa1:
+                    LDA(IndexedIndirect());
+                    break;
+                case 0xa2:
+                    LDX(Immediate());
+                    break;
+                case 0xa4:
+                    LDY(ZeroPage());
+                    break;
+                case 0xa5:
+                    LDA(ZeroPage());
+                    break;
+                case 0xa6:
+                    LDX(ZeroPage());
+                    break;
+                case 0xa8:
+                    TAY();
+                    break;
+                case 0xa9:
+                    LDA(Immediate());
+                    break;
+                case 0xaa:
+                    TAX();
+                    break;
+                case 0xac:
+                    LDY(Absolute());
+                    break;
+                case 0xad:
+                    LDA(Absolute());
+                    break;
+                case 0xae:
+                    LDX(Absolute());
+                    break;
+                case 0xb0:
+                    BCS(Relative());
+                    break;
+                case 0xb1:
+                    LDA(IndirectIndexed());
+                    break;
+                case 0xb4:
+                    LDY(ZeroPageX());
+                    break;
+                case 0xb5:
+                    LDA(ZeroPageX());
+                    break;
+                case 0xb6:
+                    LDX(ZeroPageY());
+                    break;
+                case 0xb8:
+                    CLV();
+                    break;
+                case 0xb9:
+                    LDA(AbsoluteY());
+                    break;
+                case 0xba:
+                    TSX();
+                    break;
+                case 0xbc:
+                    LDY(AbsoluteX());
+                    break;
+                case 0xbd:
+                    LDA(AbsoluteX());
+                    break;
+                case 0xbe:
+                    LDX(AbsoluteY());
+                    break;
+                case 0xc0:
+                    CPY(Immediate());
+                    break;
+                case 0xc1:
+                    CMP(IndexedIndirect());
+                    break;
+                case oxc4:
+                    CPY(ZeroPage());
+                    break;
+                case 0xc5:
+                    CMP(ZeroPage());
+                    break;
+                case 0xc6:
+                    DEC(ZeroPage());
+                    break;
+                case 0xc8:
+                    INY();
+                    break;
+                case 0xc9:
+                    CMP(Immediate());
+                    break;
+                case 0xca:
+                    DEX();
+                    break;
+                case 0xcc:
+                    CPY(Absolute());
+                    break;
+                case 0xcd:
+                    CMP(Absolute());
+                    break;
+                case 0xce:
+                    DEC(Absolute());
+                    break;
+                case 0xd0:
+                    BNE(Relative());
+                    break;
+                case 0xd1:
+                    CMP(IndirectIndexed());
+                    break;
+                case 0xd5:
+                    CMP(ZeroPageX());
+                    break;
+                case 0xd6:
+                    DEC(ZeroPageX());
+                    break;
+                case 0xd8:
+                    CLD();
+                    break;
+                case 0xd9:
+                    CMP(AbsoluteY());
+                    break;
+                case 0xdd:
+                    CMP(AbsoluteX());
+                    break;
+                case 0xde:
+                    DEC(AbsoluteX());
+                    break;
+                case 0xe0:
+                    CPX(Immediate());
+                    break;
+                case 0xe1:
+                    SBC(IndexedIndirect());
+                    break;
+                case 0xe4:
+                    CPX(ZeroPage());
+                    break;
+                case 0xe5:
+                    SBC(ZeroPage());
+                    break;
+                case 0xe6:
+                    INC(ZeroPage());
+                    break;
+                case 0xe8:
+                    INX();
+                    break;
+                case 0xe9:
+                    SBC(Immediate());
+                    break;
+                case 0xea:
+                    NOP();
+                    break;
+                case 0xec:
+                    CPX(Absolute());
+                    break;
+                case 0xed:
+                    SBC(Absolute());
+                    break;
+                case 0xee:
+                    INC(Absolute());
+                    break;
+                case 0xf0:
+                    BEQ(Relative());
+                    break;
+                case 0xf1:
+                    SBC(IndirectIndexed());
+                    break;
+                case 0xf5:
+                    SBC(ZeroPageX());
+                    break;
+                case 0xf6:
+                    INC(ZeroPage());
+                    break;
+                case 0xf8:
+                    SED();
+                    break;
+                case 0xf9:
+                    SBC(AbsoluteY());
+                    break;
+                case 0xfd:
+                    SBC(AbsoluteX());
+                    break;
+                case 0xfe:
+                    INC(AbsoluteX());
+                    break;
+
+                
+
+
+            }
         }
 
         private void negzero(byte value)
@@ -304,7 +765,7 @@ namespace NESharp
         }
 
         //DEX   Decrement Index X by One
-        private void DEX(ushort address)
+        private void DEX()
         {
             byte src = XR;
             src = (byte)((src - 1) & 0xff);
@@ -314,7 +775,7 @@ namespace NESharp
         }
 
         //DEY   Decrement Index Y by One
-        private void DEY(ushort address)
+        private void DEY()
         {
             byte src = YR;
             src = (byte)((src - 1) & 0xff);
@@ -334,7 +795,7 @@ namespace NESharp
         }
 
         //INX   Increment Index X by One
-        private void INX(ushort address)
+        private void INX()
         {
             byte src = XR;
             src = (byte)((src + 1) & 0xff);
@@ -344,7 +805,7 @@ namespace NESharp
         }
 
         //INY   Increment Index Y by One
-        private void INY(ushort address)
+        private void INY()
         {
             byte src = YR;
             src = (byte)((src + 1) & 0xff);
@@ -574,10 +1035,10 @@ namespace NESharp
         }
 
         //RTI   Return from Interrupt
-        private void RTI(ushort address)
+        private void RTI()
         {
-            //TODO: RTI (set_sr)
-            byte src = memory.ReadByte(address);
+
+            byte src;
             src = PULL();
             SET_SR(src);
             src = PULL();
