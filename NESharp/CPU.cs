@@ -745,7 +745,55 @@ namespace NESharp
 
         private ushort AbsoluteX()
         {
-            return memory.ReadByte16((ushort)(PC + 1) + X);
+            return memory.ReadByte16((ushort)((PC + 1) + XR));
+        }
+
+        private ushort AbsoluteY()
+        {
+            return memory.ReadByte16((ushort)((PC + 1) + YR));
+        }
+
+        private ushort Relative()
+        {
+            return (ushort)(PC + memory.ReadByte((ushort)(PC + 1)) + 2);
+        }
+
+        private ushort ZeroPage()
+        {
+            return memory.ReadByte((ushort)(PC + 1));
+        }
+
+        private ushort ZeroPageY()
+        {
+            return (ushort)((memory.ReadByte((ushort)(PC + 1)) + YR) & 0xFF);
+        }
+
+        private ushort ZeroPageX()
+        {
+            return (ushort)((memory.ReadByte((ushort)(PC + 1)) + XR) & 0xFF);
+        }
+
+        private ushort Indirect()
+        {
+            return memory.Read16WrapPage(memory.ReadByte16((ushort)(PC + 1)));
+        }
+
+        private ushort IndexedIndirect()
+        {
+            // Zeropage address of lower nibble of target address (& 0xFF to wrap at 255)
+            ushort lowerNibbleAddress = (ushort)((memory.ReadByte((ushort)(PC + 1)) + XR) & 0xFF);
+
+            // Target address (Must wrap to 0x00 if at 0xFF)
+            return (ushort)memory.Read16WrapPage((ushort)(lowerNibbleAddress));
+        }
+
+        private ushort IndirectIndexed()
+        {
+            // Zeropage address of the value to add the Y register to to get the target address
+            ushort valueAddress = (ushort)memory.ReadByte((ushort)(PC + 1));
+
+            // Target address (Must wrap to 0x00 if at 0xFF)
+            return (ushort)(memory.Read16WrapPage(valueAddress) + YR);
         }
 
         #endregion AddressingMode

@@ -98,6 +98,22 @@ namespace NESharp
             byte hi = ReadByte((ushort)(address + 1));
             return (ushort)((hi << 8) | lo);
         }
+
+        public ushort Read16WrapPage(ushort address)
+        {
+            ushort data;
+            if ((address & 0xFF) == 0xFF)
+            {
+                byte lo = ReadByte(address);
+                byte hi = ReadByte((ushort)(address & (~0xFF)));
+                data = (ushort)((hi << 8) | lo);
+            }
+            else
+            {
+                data = ReadByte16(address);
+            }
+            return data;
+        }
     }
 
     internal class PPUMemory : Memory
