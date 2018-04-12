@@ -1,21 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Diagnostics;
 
 namespace NESharp
 {
-    class Console
+    internal class Console
     {
-        CPU cpu;
-        CPUMemory cpuMemory;
-        Mappers mapper;
+        public CPU cpu;
+        private CPUMemory cpuMemory;
+        public Mappers mapper;
         public Cartridge cartridge;
+
+        public bool Stop;
 
         public Console()
         {
+            cpuMemory = new CPUMemory(this);
+            cpu = new CPU(cpuMemory);
+        }
 
+        public void LoadCartridge(string path)
+        {
+            cartridge = new Cartridge(path);
+            switch (cartridge.mapperNumber)
+            {
+                case 0:
+                    mapper = new NROM(this);
+                    break;
+
+                default:
+                    System.Console.WriteLine("Mapper is not supported");
+                    break;
+            }
+            cpu.Reset();
+            cpuMemory.Reset();
+        }
+
+        public void Cycle()
+        {
+            cpu.Step();
         }
     }
 }

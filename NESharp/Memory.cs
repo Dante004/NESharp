@@ -50,10 +50,12 @@ namespace NESharp
     internal class CPUMemory : Memory
     {
         private byte[] ram;
+        private Console console;
 
-        public CPUMemory()
+        public CPUMemory(Console console)
         {
             ram = new byte[2048];
+            this.console = console;
         }
 
         public void Reset()
@@ -73,6 +75,10 @@ namespace NESharp
             {
                 data = ram[HandleMirrorRam(address)];
             }
+            else if (address >= 0x4020) // Handled by mapper (PRG rom, CHR rom/ram etc.)
+            {
+                data = console.mapper.ReadByte(address);
+            }
             else
             {
                 throw new Exception("Wrong address");
@@ -85,6 +91,10 @@ namespace NESharp
             if (address < 0x2000)
             {
                 ram[HandleMirrorRam(address)] = valume;
+            }
+            else if (address >= 0x4020)
+            {
+                console.mapper.WriteByte(address, valume);
             }
             else
             {

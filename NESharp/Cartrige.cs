@@ -3,26 +3,30 @@ using System;
 
 namespace NESharp
 {
-    class Cartridge
+    internal class Cartridge
     {
-        const int HeaderMagic = 0x1A53454E;
-        byte[] pgrROM;
-        byte[] chrROM;
-        byte[] pgrRAM;
+        private const int HeaderMagic = 0x1A53454E;
+        private byte[] pgrROM;
+        private byte[] chrROM;
+        private byte[] pgrRAM;
+
         //How many PGR ROM has banks 16kB
         public int pgrRomBanks;
-        //How many CHR ROM has banks 8kB
-        int chrRomBanks;
-        bool useChrRAM;
 
-        int flag6;
-        int flag7;
+        //How many CHR ROM has banks 8kB
+        private int chrRomBanks;
+
+        private bool useChrRAM;
+
+        private int flag6;
+        private int flag7;
 
         public bool verticalVRAMMirroring;
+
         //If true cartridge contains a 512 byte trainer
         public bool containsTrainers;
 
-        int mapperNumber;
+        public int mapperNumber;
 
         public Cartridge(string path)
         {
@@ -35,10 +39,10 @@ namespace NESharp
             pgrRAM = new byte[8192];
         }
 
-        void ParseHeader(BinaryReader reader)
+        private void ParseHeader(BinaryReader reader)
         {
             uint magicNumber = reader.ReadUInt32();
-            if(HeaderMagic != magicNumber)
+            if (HeaderMagic != magicNumber)
             {
                 System.Console.WriteLine("Magic number is wrong");
                 return;
@@ -48,7 +52,7 @@ namespace NESharp
 
             chrRomBanks = reader.ReadByte();
             //what if cartridge use chrc ram
-            if(chrRomBanks ==0)
+            if (chrRomBanks == 0)
             {
                 chrRomBanks = 2;
                 useChrRAM = true;
@@ -84,23 +88,23 @@ namespace NESharp
 
             mapperNumber = flag7 & 0xF0 | (flag6 >> 4 & 0xF);
 
-            if((flag7 & 0x0b0000_1100)== 0x0b0000_1100)
+            if ((flag7 & 0x0b0000_1100) == 0x0b0000_1100)
             {
                 System.Console.WriteLine("This cartridge is in NES 2.0 format");
             }
-
         }
 
-        void LoadPGRROM(BinaryReader reader)
+        private void LoadPGRROM(BinaryReader reader)
         {
             int pgrRomOffset = containsTrainers ? 16 + 512 : 16;
             reader.BaseStream.Seek(pgrRomOffset, SeekOrigin.Begin);
             pgrROM = new byte[pgrRomBanks * 16383];
             reader.Read(pgrROM, 0, pgrRomBanks * 16383);
         }
-        void LoadCHRROM(BinaryReader reader)
+
+        private void LoadCHRROM(BinaryReader reader)
         {
-            if(useChrRAM)
+            if (useChrRAM)
             {
                 chrROM = new byte[8192];
             }
@@ -121,7 +125,7 @@ namespace NESharp
             return pgrRAM[index];
         }
 
-        public void WritePGRRAM(int index,byte valume)
+        public void WritePGRRAM(int index, byte valume)
         {
             pgrRAM[index] = valume;
         }
@@ -131,7 +135,7 @@ namespace NESharp
             return chrROM[index];
         }
 
-        public void WriteCHR(int index,byte valume)
+        public void WriteCHR(int index, byte valume)
         {
             if (useChrRAM) return;
             chrROM[index] = valume;

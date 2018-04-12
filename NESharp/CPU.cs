@@ -32,6 +32,14 @@ namespace NESharp
         private int clk; //clk : the number of cycles an instruction takes.
         public CPUMemory memory;
 
+        // Interrupts
+        private bool irqInterrupt;
+
+        private bool nmiInterrupt;
+
+        // If positive, idle 1 cycle and deincrement each step
+        private int _idle;
+
         public CPU(CPUMemory memory)
         {
             this.memory = memory;
@@ -43,6 +51,7 @@ namespace NESharp
             AC = 0x0;
             XR = 0x0;
             YR = 0x0;
+            clk = 0;
 
             memory.WriteByte(0x4017, 0x00);
             memory.WriteByte(0x4015, 0x00);
@@ -62,469 +71,792 @@ namespace NESharp
 
         public void Step()
         {
+            if (_idle > 0)
+            {
+                _idle--;
+            }
+
+            if (irqInterrupt) Irq();
+            irqInterrupt = false;
+
+            if (nmiInterrupt) Nmi();
+            nmiInterrupt = false;
+
             byte opCode = memory.ReadByte(PC);
-            ushort address = 0;
 
             switch (opCode)
             {
                 case 0x00:
                     BRK();
+                    clk += 7;
                     break;
+
                 case 0x01:
                     ORA(IndexedIndirect());
+                    clk += 6;
                     break;
+
                 case 0x05:
                     ORA(ZeroPage());
+                    clk += 5;
                     break;
+
                 case 0x06:
                     ASL(ZeroPage());
+                    clk += 5;
                     break;
+
                 case 0x08:
                     PHP();
+                    clk += 3;
                     break;
+
                 case 0x09:
                     ORA(Immediate());
+                    clk += 2;
                     break;
+
                 case 0x0a:
                     ASL();
+                    clk += 2;
                     break;
+
                 case 0x0d:
                     ORA(Absolute());
+                    clk += 04;
                     break;
+
                 case 0x0e:
                     ASL(Absolute());
+                    clk += 06;
                     break;
+
                 case 0x10:
                     BPL(Relative());
+                    clk += 2;
                     break;
+
                 case 0x11:
                     ORA(IndirectIndexed());
+                    clk += 5;
                     break;
+
                 case 0x15:
                     ORA(ZeroPageX());
+                    clk += 4;
                     break;
+
                 case 0x16:
                     ASL(ZeroPageX());
+                    clk += 6;
                     break;
+
                 case 0x18:
                     CLC();
+                    clk += 2;
                     break;
+
                 case 0x19:
                     ORA(AbsoluteY());
+                    clk += 4;
                     break;
+
                 case 0x1d:
                     ORA(AbsoluteX());
+                    clk += 4;
                     break;
+
                 case 0x1e:
                     ASL(AbsoluteX());
+                    clk += 7;
                     break;
+
                 case 0x20:
                     JSR(Absolute());
+                    clk += 6;
                     break;
+
                 case 0x21:
                     AND(IndexedIndirect());
+                    clk += 6;
                     break;
+
                 case 0x24:
                     BIT(ZeroPage());
+                    clk += 3;
                     break;
+
                 case 0x25:
                     AND(ZeroPage());
+                    clk += 3;
                     break;
+
                 case 0x26:
                     ROL(ZeroPage());
+                    clk += 5;
                     break;
+
                 case 0x28:
                     PLP();
+                    clk += 4;
                     break;
+
                 case 0x29:
                     AND(Immediate());
+                    clk += 2;
                     break;
+
                 case 0x2a:
                     ROL();
+                    clk += 2;
                     break;
+
                 case 0x2c:
                     BIT(Absolute());
+                    clk += 4;
                     break;
+
                 case 0x2d:
                     AND(Absolute());
+                    clk += 4;
                     break;
+
                 case 0x2e:
                     ROL(Absolute());
+                    clk += 6;
                     break;
+
                 case 0x30:
                     BMI(Relative());
+                    clk += 2;
                     break;
+
                 case 0x31:
                     AND(IndirectIndexed());
+                    clk += 5;
                     break;
+
                 case 0x35:
                     AND(ZeroPageX());
+                    clk += 4;
                     break;
+
                 case 0x36:
                     ROL(ZeroPageX());
+                    clk += 6;
                     break;
+
                 case 0x38:
                     SEC();
+                    clk += 2;
                     break;
+
                 case 0x39:
                     AND(AbsoluteY());
+                    clk += 4;
                     break;
+
                 case 0x3d:
                     AND(AbsoluteX());
+                    clk += 4;
                     break;
+
                 case 0x3e:
                     ROL(AbsoluteX());
+                    clk += 7;
                     break;
+
                 case 0x40:
                     RTI();
+                    clk += 6;
                     break;
+
                 case 0x41:
                     EOR(IndexedIndirect());
+                    clk += 6;
                     break;
+
                 case 0x45:
                     EOR(ZeroPage());
+                    clk += 3;
                     break;
+
                 case 0x46:
                     LSR(ZeroPage());
+                    clk += 5;
                     break;
+
                 case 0x48:
                     PHA();
+                    clk += 3;
                     break;
+
                 case 0x49:
                     EOR(Immediate());
+                    clk += 2;
                     break;
+
                 case 0x4a:
                     LSR();
+                    clk += 2;
                     break;
+
                 case 0x4c:
                     JMP(AC);
+                    clk += 3;
                     break;
+
                 case 0x4d:
                     EOR(Absolute());
+                    clk += 4;
                     break;
+
                 case 0x4e:
                     LSR(Absolute());
+                    clk += 6;
                     break;
+
                 case 0x50:
                     BVC(Relative());
+                    clk += 2;
                     break;
+
                 case 0x51:
                     EOR(IndirectIndexed());
+                    clk += 5;
                     break;
+
                 case 0x55:
                     EOR(ZeroPageX());
+                    clk += 4;
                     break;
+
                 case 0x56:
                     LSR(ZeroPageX());
+                    clk += 6;
                     break;
+
                 case 0x58:
                     CLI();
+                    clk += 2;
                     break;
+
                 case 0x59:
                     EOR(AbsoluteY());
+                    clk += 4;
                     break;
+
                 case 0x5d:
                     EOR(AbsoluteX());
+                    clk += 4;
                     break;
+
                 case 0x5e:
                     LSR(AbsoluteX());
+                    clk += 7;
                     break;
+
                 case 0x60:
                     RTS();
+                    clk += 6;
                     break;
+
                 case 0x61:
                     ADC(IndexedIndirect());
+                    clk += 6;
                     break;
+
                 case 0x65:
                     ADC(ZeroPage());
+                    clk += 3;
                     break;
+
                 case 0x66:
                     ROR(ZeroPage());
+                    clk += 5;
                     break;
+
                 case 0x68:
                     PLA();
+                    clk += 4;
                     break;
+
                 case 0x69:
                     ADC(Immediate());
+                    clk += 2;
                     break;
+
                 case 0x6a:
                     ROR();
+                    clk += 2;
                     break;
+
                 case 0x6c:
                     JMP(Indirect());
+                    clk += 6;
                     break;
+
                 case 0x6d:
                     ADC(Absolute());
+                    clk += 4;
                     break;
+
                 case 0x6e:
                     ROR(AbsoluteX());
+                    clk += 6;
                     break;
+
                 case 0x70:
                     BVS(Relative());
+                    clk += 2;
                     break;
+
                 case 0x71:
                     ADC(IndirectIndexed());
+                    clk += 5;
                     break;
+
                 case 0x75:
                     ADC(ZeroPageX());
+                    clk += 4;
                     break;
+
                 case 0x76:
                     ROR(ZeroPageX());
+                    clk += 6;
                     break;
+
                 case 0x78:
                     SEI();
+                    clk += 2;
                     break;
+
                 case 0x79:
                     ADC(AbsoluteY());
+                    clk += 4;
                     break;
+
                 case 0x7d:
                     ADC(AbsoluteX());
+                    clk += 4;
                     break;
+
                 case 0x7e:
                     ROR(Absolute());
+                    clk += 7;
                     break;
+
                 case 0x81:
                     STA(IndexedIndirect());
+                    clk += 6;
                     break;
+
                 case 0x84:
                     STY(ZeroPage());
+                    clk += 3;
                     break;
+
                 case 0x85:
                     STA(ZeroPage());
+                    clk += 3;
                     break;
+
                 case 0x86:
                     STX(ZeroPage());
+                    clk += 3;
                     break;
+
                 case 0x88:
                     DEY();
+                    clk += 2;
                     break;
+
                 case 0x8a:
                     TXA();
+                    clk += 2;
                     break;
+
                 case 0x8c:
                     STY(Absolute());
+                    clk += 4;
                     break;
+
                 case 0x8d:
                     STA(Absolute());
+                    clk += 4;
                     break;
+
                 case 0x8e:
                     STX(Absolute());
+                    clk += 4;
                     break;
+
                 case 0x90:
                     BCC(Relative());
+                    clk += 2;
                     break;
+
                 case 0x91:
                     STA(IndirectIndexed());
+                    clk += 6;
                     break;
+
                 case 0x94:
                     STY(ZeroPageX());
+                    clk += 4;
                     break;
+
                 case 0x95:
                     STA(ZeroPageX());
+                    clk += 4;
                     break;
+
                 case 0x96:
                     STX(ZeroPageY());
+                    clk += 4;
                     break;
+
                 case 0x98:
                     TYA();
+                    clk += 2;
                     break;
+
                 case 0x99:
                     STA(AbsoluteY());
+                    clk += 5;
                     break;
+
                 case 0x9a:
                     TXS();
+                    clk += 2;
                     break;
+
                 case 0x9d:
                     STA(AbsoluteX());
+                    clk += 5;
                     break;
+
                 case 0xa0:
                     LDY(Immediate());
+                    clk += 2;
                     break;
+
                 case 0xa1:
                     LDA(IndexedIndirect());
+                    clk += 6;
                     break;
+
                 case 0xa2:
                     LDX(Immediate());
+                    clk += 2;
                     break;
+
                 case 0xa4:
                     LDY(ZeroPage());
+                    clk += 3;
                     break;
+
                 case 0xa5:
                     LDA(ZeroPage());
+                    clk += 3;
                     break;
+
                 case 0xa6:
                     LDX(ZeroPage());
+                    clk += 3;
                     break;
+
                 case 0xa8:
                     TAY();
+                    clk += 2;
                     break;
+
                 case 0xa9:
                     LDA(Immediate());
+                    clk += 2;
                     break;
+
                 case 0xaa:
                     TAX();
+                    clk += 2;
                     break;
+
                 case 0xac:
                     LDY(Absolute());
+                    clk += 4;
                     break;
+
                 case 0xad:
                     LDA(Absolute());
+                    clk += 4;
                     break;
+
                 case 0xae:
                     LDX(Absolute());
+                    clk += 4;
                     break;
+
                 case 0xb0:
                     BCS(Relative());
+                    clk += 2;
                     break;
+
                 case 0xb1:
                     LDA(IndirectIndexed());
+                    clk += 5;
                     break;
+
                 case 0xb4:
                     LDY(ZeroPageX());
+                    clk += 4;
                     break;
+
                 case 0xb5:
                     LDA(ZeroPageX());
+                    clk += 4;
                     break;
+
                 case 0xb6:
                     LDX(ZeroPageY());
+                    clk += 4;
                     break;
+
                 case 0xb8:
                     CLV();
+                    clk += 2;
                     break;
+
                 case 0xb9:
                     LDA(AbsoluteY());
+                    clk += 4;
                     break;
+
                 case 0xba:
                     TSX();
+                    clk += 2;
                     break;
+
                 case 0xbc:
                     LDY(AbsoluteX());
+                    clk += 4;
                     break;
+
                 case 0xbd:
                     LDA(AbsoluteX());
+                    clk += 4;
                     break;
+
                 case 0xbe:
                     LDX(AbsoluteY());
+                    clk += 4;
                     break;
+
                 case 0xc0:
                     CPY(Immediate());
+                    clk += 2;
                     break;
+
                 case 0xc1:
                     CMP(IndexedIndirect());
+                    clk += 6;
                     break;
+
                 case 0xc4:
                     CPY(ZeroPage());
+                    clk += 3;
                     break;
+
                 case 0xc5:
                     CMP(ZeroPage());
+                    clk += 3;
                     break;
+
                 case 0xc6:
                     DEC(ZeroPage());
+                    clk += 5;
                     break;
+
                 case 0xc8:
                     INY();
+                    clk += 2;
                     break;
+
                 case 0xc9:
                     CMP(Immediate());
+                    clk += 2;
                     break;
+
                 case 0xca:
                     DEX();
+                    clk += 2;
                     break;
+
                 case 0xcc:
                     CPY(Absolute());
+                    clk += 4;
                     break;
+
                 case 0xcd:
                     CMP(Absolute());
+                    clk += 4;
                     break;
+
                 case 0xce:
                     DEC(Absolute());
+                    clk += 6;
                     break;
+
                 case 0xd0:
                     BNE(Relative());
+                    clk += 2;
                     break;
+
                 case 0xd1:
                     CMP(IndirectIndexed());
+                    clk += 5;
                     break;
+
                 case 0xd5:
                     CMP(ZeroPageX());
+                    clk += 4;
                     break;
+
                 case 0xd6:
                     DEC(ZeroPageX());
+                    clk += 6;
                     break;
+
                 case 0xd8:
                     CLD();
+                    clk += 2;
                     break;
+
                 case 0xd9:
                     CMP(AbsoluteY());
+                    clk += 4;
                     break;
+
                 case 0xdd:
                     CMP(AbsoluteX());
+                    clk += 4;
                     break;
+
                 case 0xde:
                     DEC(AbsoluteX());
+                    clk += 7;
                     break;
+
                 case 0xe0:
                     CPX(Immediate());
+                    clk += 2;
                     break;
+
                 case 0xe1:
                     SBC(IndexedIndirect());
+                    clk += 6;
                     break;
+
                 case 0xe4:
                     CPX(ZeroPage());
+                    clk += 3;
                     break;
+
                 case 0xe5:
                     SBC(ZeroPage());
+                    clk += 3;
                     break;
+
                 case 0xe6:
                     INC(ZeroPage());
+                    clk += 5;
                     break;
+
                 case 0xe8:
                     INX();
+                    clk += 2;
                     break;
+
                 case 0xe9:
                     SBC(Immediate());
+                    clk += 2;
                     break;
+
                 case 0xea:
                     NOP();
+                    clk += 2;
                     break;
+
                 case 0xec:
                     CPX(Absolute());
+                    clk += 4;
                     break;
+
                 case 0xed:
                     SBC(Absolute());
+                    clk += 4;
                     break;
+
                 case 0xee:
                     INC(Absolute());
+                    clk += 6;
                     break;
+
                 case 0xf0:
                     BEQ(Relative());
+                    clk += 2;
                     break;
+
                 case 0xf1:
                     SBC(IndirectIndexed());
+                    clk += 5;
                     break;
+
                 case 0xf5:
                     SBC(ZeroPageX());
+                    clk += 4;
                     break;
+
                 case 0xf6:
                     INC(ZeroPage());
+                    clk += 6;
                     break;
+
                 case 0xf8:
                     SED();
+                    clk += 2;
                     break;
+
                 case 0xf9:
                     SBC(AbsoluteY());
+                    clk += 4;
                     break;
+
                 case 0xfd:
                     SBC(AbsoluteX());
+                    clk += 4;
                     break;
+
                 case 0xfe:
                     INC(AbsoluteX());
+                    clk += 7;
                     break;
-
-                
-
-
             }
+        }
+
+        private void Nmi()
+        {
+            PushStack16(PC);
+            PUSH(GET_SR());
+            PC = memory.ReadByte16(0xFFFA);
+            flagInterrupt = true;
+        }
+
+        private void Irq()
+        {
+            PushStack16(PC);
+            PUSH(GET_SR());
+            PC = memory.ReadByte16(0xFFFE);
+            flagInterrupt = true;
         }
 
         private void negzero(byte value)
@@ -617,6 +949,22 @@ namespace NESharp
         {
             memory.WriteByte((ushort)(0x100 | SP), data);
             SP--;
+        }
+
+        private ushort PullStack16()
+        {
+            byte lo = PULL();
+            byte hi = PULL();
+            return (ushort)((hi << 8) | lo);
+        }
+
+        private void PushStack16(ushort data)
+        {
+            byte lo = (byte)(data & 0xFF);
+            byte hi = (byte)((data >> 8) & 0xFF);
+
+            PUSH(hi);
+            PUSH(lo);
         }
 
         //GET_SR    get the value of the Program Status Register.
@@ -851,6 +1199,7 @@ namespace NESharp
             SET_SIGN(src);
             SET_ZERO(src);
         }
+
         private void ASL()
         {
             byte src = AC;
@@ -889,6 +1238,7 @@ namespace NESharp
             SET_SIGN(src);
             SET_ZERO(src);
         }
+
         private void LSR()
         {
             byte src = AC;
@@ -919,6 +1269,7 @@ namespace NESharp
             SET_SIGN(src);
             SET_ZERO(src);
         }
+
         private void ROL()
         {
             byte src = AC;
@@ -942,6 +1293,7 @@ namespace NESharp
             SET_SIGN(src);
             SET_ZERO(src);
         }
+
         private void ROR()
         {
             byte src = AC;
@@ -1070,7 +1422,6 @@ namespace NESharp
         //RTI   Return from Interrupt
         private void RTI()
         {
-
             byte src;
             src = PULL();
             SET_SR(src);
@@ -1289,5 +1640,10 @@ namespace NESharp
         }
 
         #endregion AddressingMode
+
+        public string Debuger()
+        {
+            return "A: " + AC + "XR: " + XR + "YR: " + YR + "PC: " + PC + "SP: " + SP;
+        }
     }
 }
