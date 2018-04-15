@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace NESharp
 {
-
-    enum VramMirroring
+    internal enum VramMirroring
     {
         Horizontal,
         Vertical,
@@ -15,7 +14,7 @@ namespace NESharp
         SingleUpper
     }
 
-    abstract class Mappers
+    internal abstract class Mappers
     {
         protected VramMirroring vramMirroring;
 
@@ -24,7 +23,7 @@ namespace NESharp
         public int VRamAddressToIndex(ushort address)
         {
             int index = (address - 0x2000) % 0x1000;
-            switch(vramMirroring)
+            switch (vramMirroring)
             {
                 case VramMirroring.Vertical:
                     {
@@ -52,10 +51,11 @@ namespace NESharp
         }
 
         abstract public byte ReadByte(ushort address);
+
         abstract public void WriteByte(ushort address, byte valume);
     }
 
-    class NROM : Mappers
+    internal class NROM : Mappers
     {
         public NROM(Console console)
         {
@@ -63,20 +63,20 @@ namespace NESharp
             vramMirroring = console.cartridge.verticalVRAMMirroring ? VramMirroring.Vertical : VramMirroring.Horizontal;
         }
 
-        int AddressToIndex(ushort address)
+        private int AddressToIndex(ushort address)
         {
             ushort mappedAddress = (ushort)(address - 0x8000);
-            return console.cartridge.pgrRomBanks == 1 ? mappedAddress%16384:mappedAddress;
+            return console.cartridge.pgrRomBanks == 1 ? mappedAddress % 16384 : mappedAddress;
         }
 
         public override byte ReadByte(ushort address)
         {
             byte data;
-            if(address<0x2000)
+            if (address < 0x2000)
             {
                 data = console.cartridge.ReadCHR(address);
             }
-            else if (address>=0x8000)
+            else if (address >= 0x8000)
             {
                 data = console.cartridge.ReadPGRROM(AddressToIndex(address));
             }
@@ -89,12 +89,10 @@ namespace NESharp
 
         public override void WriteByte(ushort address, byte valume)
         {
-            if(address<0x2000)
+            if (address < 0x2000)
             {
                 console.cartridge.WriteCHR(address, valume);
             }
         }
     }
-
-
 }

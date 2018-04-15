@@ -31,7 +31,7 @@ namespace NESharp
                     System.Console.WriteLine("Mapper is not supported");
                     break;
             }
-            cpu.Reset();
+            cpu.PowerUp();
             cpuMemory.Reset();
         }
 

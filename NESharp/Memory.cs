@@ -75,6 +75,20 @@ namespace NESharp
             {
                 data = ram[HandleMirrorRam(address)];
             }
+            else if (address <= 0x3FFF)
+            {
+                data = 0;
+                //TODO: memory read ppu register
+            }
+            else if (address <= 0x4017)
+            {
+                data = 0;
+                //TODO: memory read apu IO register
+            }
+            else if (address <= 0x401F)
+            {
+                data = 0;
+            }
             else if (address >= 0x4020) // Handled by mapper (PRG rom, CHR rom/ram etc.)
             {
                 data = console.mapper.ReadByte(address);
@@ -91,6 +105,17 @@ namespace NESharp
             if (address < 0x2000)
             {
                 ram[HandleMirrorRam(address)] = valume;
+            }
+            else if (address <= 0x3FFF || address == 0x4014)
+            {
+                //TODO: memory write ppu
+            }
+            else if (address <= 0x4017)
+            {
+                //TODO: memory write apu and IO
+            }
+            else if (address <= 0x401F)
+            {
             }
             else if (address >= 0x4020)
             {
@@ -128,14 +153,77 @@ namespace NESharp
 
     internal class PPUMemory : Memory
     {
+        private Console console;
+        private byte[] vram;
+        private byte[] paletteRam;
+
+        public PPUMemory(Console console)
+        {
+            this.console = console;
+            vram = new byte[2018];
+            paletteRam = new byte[32];
+        }
+
+        public void Reset()
+        {
+            Array.Clear(vram, 0, vram.Length);
+            Array.Clear(paletteRam, 0, paletteRam.Length);
+        }
+
         public override byte ReadByte(ushort address)
         {
-            throw new NotImplementedException();
+            byte data;
+            if (address < 0x2000)
+            {
+                data = console.mapper.ReadByte(address);
+            }
+            else if (address <= 0x3EFF)
+            {
+                data = vram[console.mapper.VRamAddressToIndex(address)];
+            }
+            else if (address >= 0x3F00 && address <= 0x3FFF)
+            {
+                data = paletteRam[GetPalleteRamIndex(address)];
+            }
+            else
+            {
+                throw new Exception("Wrong address");
+            }
+            return data;
         }
 
         public override void WriteByte(ushort address, byte valume)
         {
-            throw new NotImplementedException();
+            if (address < 0x2000)
+            {
+                console.mapper.WriteByte(address, valume);
+            }
+            else if (address <= 0x3EFF)
+            {
+                vram[console.mapper.VRamAddressToIndex(address)] = valume;
+            }
+            else if (address >= 0x3F00 && address <= 0x3FFF)
+            {
+                paletteRam[GetPalleteRamIndex(address)] = valume;
+            }
+            else
+            {
+                throw new Exception("Wrong address");
+            }
+        }
+
+        private ushort GetPalleteRamIndex(ushort address)
+        {
+            ushort index = (ushort)((address - 0x3F00) % 32);
+
+            if (index >= 16 && ((index - 16) % 4 == 0))
+            {
+                return (ushort)(index - 16);
+            }
+            else
+            {
+                return index;
+            }
         }
     }
 }
