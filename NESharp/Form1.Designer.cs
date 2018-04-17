@@ -68,7 +68,7 @@
             // openROMToolStripMenuItem
             // 
             this.openROMToolStripMenuItem.Name = "openROMToolStripMenuItem";
-            this.openROMToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openROMToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.openROMToolStripMenuItem.Text = "Open ROM";
             this.openROMToolStripMenuItem.Click += new System.EventHandler(this.openROMToolStripMenuItem_Click);
             // 
@@ -80,7 +80,7 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(22, 42);
+            this.textBox1.Location = new System.Drawing.Point(12, 49);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(562, 132);

@@ -117,7 +117,7 @@ namespace NESharp
 
         public byte ReadPGRROM(int index)
         {
-            return pgrROM[index];
+            return pgrROM[index - 2]; //TODO: pamiętaj o usunięciu tej 3
         }
 
         public byte ReadPGRRAM(int index)

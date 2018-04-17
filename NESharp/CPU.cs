@@ -1643,7 +1643,7 @@ namespace NESharp
 
         public string Debuger()
         {
-            return "A: " + AC + "XR: " + XR + "YR: " + YR + "PC: " + PC + "SP: " + SP;
+            return "A: " + AC + " XR: " + XR + " YR: " + YR + " PC: " + PC + " SP: " + SP;
         }
     }
 }

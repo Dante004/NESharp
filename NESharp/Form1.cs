@@ -26,17 +26,18 @@ namespace NESharp
                 string fileName = openFileDialog1.FileName;
                 console = new Console();
                 console.LoadCartridge(fileName);
+                textBox1.Text = console.cpu.Debuger();
             }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             console.Cycle();
+            textBox1.Text = console.cpu.Debuger();
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            textBox1.Text = console.cpu.Debuger();
         }
     }
 }
